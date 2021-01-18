@@ -1,46 +1,36 @@
-<a href="https://terraform.io">
-    <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" alt="Terraform logo" title="Terraform" align="right" height="50" />
-</a>
+# Rebase from upstream
 
-# Terraform Provider for AWS
+git remote add upstream git@github.com:hashicorp/terraform-provider-aws.git
 
-[![Forums][discuss-badge]][discuss]
+git fetch upstream
 
-[discuss-badge]: https://img.shields.io/badge/discuss-terraform--aws-623CE4.svg?style=flat
-[discuss]: https://discuss.hashicorp.com/c/terraform-providers/tf-aws/
+git rebase -i upstream/master
 
-- Website: [terraform.io](https://terraform.io)
-- Tutorials: [learn.hashicorp.com](https://learn.hashicorp.com/terraform?track=getting-started#getting-started)
-- Forum: [discuss.hashicorp.com](https://discuss.hashicorp.com/c/terraform-providers/tf-aws/)
-- Chat: [gitter](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing List: [Google Groups](http://groups.google.com/group/terraform-tool)
+# Build
 
-The Terraform AWS provider is a plugin for Terraform that allows for the full lifecycle management of AWS resources.
-This provider is maintained internally by the HashiCorp AWS Provider team.
+install go and goreleaser
 
-Please note: We take Terraform's security and our users' trust very seriously. If you believe you have found a security issue in the Terraform AWS Provider, please responsibly disclose by contacting us at security@hashicorp.com.
+goreleaser check
 
-## Quick Starts
+git tag -f v3.24.1
 
-- [Using the provider](https://www.terraform.io/docs/providers/aws/index.html)
-- [Provider development](docs/DEVELOPMENT.md)
+rm -rf ./dist
 
-## Documentation
+goreleaser build
 
-Full, comprehensive documentation is available on the Terraform website:
+./upload.bash 3.24.1
 
-https://terraform.io/docs/providers/aws/index.html
+# Use
 
-## Roadmap
-
-Our roadmap for expanding support in Terraform for AWS resources can be found in our [Roadmap](ROADMAP.md) which is published quarterly.
-
-## Frequently Asked Questions
-
-Responses to our most frequently asked questions can be found in our [FAQ](docs/FAQ.md )
-
-## Contributing
-
-The Terraform AWS Provider is the work of thousands of contributors. We appreciate your help!
-
-To contribute, please read the contribution guidelines: [Contributing to Terraform - AWS Provider](docs/CONTRIBUTING.md)
+Setup the following in your `~/.terraformrc`:
+```
+provider_installation {
+  network_mirror {
+    url     = "https://tgtg-public-dist.s3-eu-west-1.amazonaws.com/terraform/providers/"
+    include = ["terraform-registry.tgtg.ninja/*/*"]
+  }
+  direct {
+    exclude = ["terraform-registry.tgtg.ninja/*/*"]
+  }
+}
+```
